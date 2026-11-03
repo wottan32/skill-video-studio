@@ -66,6 +66,8 @@ Este documento recoge la revisión de seguridad hecha antes de incorporar la ski
 
 ## 6. Pendiente
 
+Para auditar las dependencias fijadas se recomienda `supply-chain-risk-auditor` de Trail of Bits; su revisión previa está en [security-audit-trailofbits.md](security-audit-trailofbits.md).
+
 - Auditar el código de HyperFrames, Playwright CLI, VHS y ttyd: es el mayor riesgo que queda, y está fuera del control de esta skill.
 - Revisar línea a línea `local-devrel-video-studio-guide.md` y `local-talking-video-avatar-guide.md`.
 - Comprobar que las funciones opcionales (TTS, avatar, VHS) siguen funcionando con las versiones fijadas; en esta revisión no se ejecutó ningún script.
