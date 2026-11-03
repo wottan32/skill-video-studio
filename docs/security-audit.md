@@ -64,10 +64,34 @@ Este documento recoge la revisión de seguridad hecha antes de incorporar la ski
 6. **Dejar narración y avatar para después**, y cuando se usen, con un host GPU propio, una clave SSH exclusiva para esa tarea y un archivo `~/.config/devrel-video/env` con `chmod 600`.
 7. **Vendorizar GSAP y las fuentes** en proyectos confidenciales (ver `production-notes.md` → Vendoring).
 
-## 6. Pendiente
+## 6. Auditoría de dependencias (2026-11-03)
 
-Para auditar las dependencias fijadas se recomienda `supply-chain-risk-auditor` de Trail of Bits; su revisión previa está en [security-audit-trailofbits.md](security-audit-trailofbits.md).
+Las dependencias directas se auditaron con `supply-chain-risk-auditor` 2.0.4 de Trail of Bits (revisión previa de ese plugin en [security-audit-trailofbits.md](security-audit-trailofbits.md)). Resultado: 0 avisos y 0 hallazgos en las 5 dependencias medidas; las 5 tienen repositorio activo y política de seguridad publicada.
 
-- Auditar el código de HyperFrames, Playwright CLI, VHS y ttyd: es el mayor riesgo que queda, y está fuera del control de esta skill.
+| Informe | Cubre | Resultado |
+|---|---|---|
+| [supply-chain-report-pinned-tools.md](supply-chain-report-pinned-tools.md) | `hyperframes@0.9.6`, `@playwright/cli@0.1.23`, `vhs v0.12.1` (manifiesto sintético a partir de `_versions.sh`) | 0 avisos; ambos paquetes npm con provenance y sin script de instalación |
+| [supply-chain-report-dev-deps.md](supply-chain-report-dev-deps.md) | `requirements-dev.txt` (PyYAML 6.0.3, numpy) | 0 avisos; numpy comprobado en 2.5.4 por declararse como rango |
+
+Lo que la medición no cubre:
+
+- `ttyd` 1.7.7: binario de GitHub Releases, ecosistema no soportado. Su control es el SHA-256 de `capture-terminal.sh` (R2).
+- Dependencias transitivas de los paquetes npm: no se generó `package-lock.json`. Para cubrirlas, generar uno fuera del repositorio con `npm i --package-lock-only hyperframes@0.9.6 @playwright/cli@0.1.23` y pasar el colector sobre él.
+- `numpy` declarado como `>=2,<3`: fijar la versión en `requirements-dev.txt` hace que el aviso se compruebe contra lo instalado.
+- `hyperframes` no tiene informe OpenSSF Scorecard; concentración de publicadores no observable en npm con provenance, PyPI ni Go.
+
+Cómo repetirla tras cada subida de versión en `_versions.sh` (con el plugin instalado y `gh` autenticado):
+
+```sh
+uv run --project <skill>/scripts <skill>/scripts/collect.py <dir-con-manifiestos> --json out/findings.json
+uv run --project <skill>/scripts <skill>/scripts/render.py out/findings.json --out out/report.md
+```
+
+donde `<skill>` es `~/.claude/plugins/cache/trailofbits/supply-chain-risk-auditor/<versión>/skills/supply-chain-risk-auditor`.
+
+## 7. Pendiente
+
+- Auditar el código de HyperFrames, Playwright CLI, VHS y ttyd: es el mayor riesgo que queda, y está fuera del control de esta skill. La auditoría de la sección 6 mide metadatos de registro, avisos y repositorio, no el código.
+- Cubrir el árbol transitivo de los paquetes npm y fijar `numpy` (ver sección 6).
 - Revisar línea a línea `local-devrel-video-studio-guide.md` y `local-talking-video-avatar-guide.md`.
 - Comprobar que las funciones opcionales (TTS, avatar, VHS) siguen funcionando con las versiones fijadas; en esta revisión no se ejecutó ningún script.
