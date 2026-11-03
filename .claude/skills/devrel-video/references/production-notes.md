@@ -5,9 +5,12 @@ Hard-won environment facts and the roadmap. The full design rationale is in the 
 
 ## Environment gotchas (verified on Ubuntu 26.04, Node 24, ffmpeg 8)
 
-- **Browser sandbox.** On AppArmor/userns-restricted hosts (`apparmor_restrict_unprivileged_userns=1`),
-  capture needs `PLAYWRIGHT_MCP_SANDBOX=false`. HyperFrames' render (chrome-headless-shell) needs **no** flag.
-  Both are handled by the scripts.
+- **Browser sandbox.** The Chromium sandbox stays **on** by default (the capture visits third-party pages).
+  On AppArmor/userns-restricted hosts (`apparmor_restrict_unprivileged_userns=1`) capture needs it off:
+  run with `DEVREL_VIDEO_NO_SANDBOX=1` (sets `PLAYWRIGHT_MCP_SANDBOX=false`, prints a warning) and record
+  trusted sites only while it is off. HyperFrames' render (chrome-headless-shell) needs **no** flag.
+- **Pinned tooling.** `scripts/_versions.sh` pins hyperframes, @playwright/cli, vhs and ttyd (+ its SHA-256).
+  Bump there after reading the upstream release notes; the scripts never use `@latest`.
 - **playwright-cli daemon.** Install the binary (local/global) — a bare per-command `npx @playwright/cli`
   drops the browser between `open` / `run-code` / `close`. `capture.sh` installs it under `.pw/` once.
 - **`hyperframes init`** is non-interactive for agents and **requires** `--example|--video|--audio` plus
@@ -117,8 +120,8 @@ Each has a commented seam in `templates/composition.html` and a field in `brief.
      non-composition preview: `scripts/stitch-envs.sh out.mp4 0b1020 term1.mp4 capture.mp4 term2.mp4`. Worked
      example of the re-enactment beat: `templates/cc-terminal.html`. Match VHS `Set Width/Height` to the browser viewport (1600×900) so
      beats stitch without letterboxing.
-   - **Tooling (one-time, `scripts/capture-terminal.sh` self-installs vhs+ttyd):** `go install github.com/charmbracelet/vhs@latest`;
-     ttyd static binary from `tsl0922/ttyd` releases; ffmpeg (present). Free-form path: `asciinema` (pip) + `agg`
+   - **Tooling (one-time, `scripts/capture-terminal.sh` self-installs vhs+ttyd):** `go install github.com/charmbracelet/vhs@<VHS_VERSION>`;
+     ttyd static binary from `tsl0922/ttyd` releases, SHA-256-verified (both pinned in `scripts/_versions.sh`); ffmpeg (present). Free-form path: `asciinema` (pip) + `agg`
      (`cargo install --git https://github.com/asciinema/agg agg`, needs rustc ≥1.86 — use `+stable` if your default is older).
 
 Dependency order: **narration → avatar**; subtitles, music, and multi-environment are independent (author

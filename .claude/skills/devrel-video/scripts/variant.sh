@@ -40,10 +40,13 @@ PLATE="${PLATE/#\~/$HOME}"
 if [ "$NO_AVATAR" = 0 ] && [ -n "$PLATE" ] && grep -q 'id="avatar"' "$PROJ/index.html"; then
   HOST="${AVATAR_HOST:?set AVATAR_HOST to the ssh target with a LatentSync checkout (see scripts/_env.sh)}"
   echo "[variant] re-lip-sync avatar bubbles to '$VOICE' (GPU on $HOST, ~10 min)…"
-  ssh -o ConnectTimeout=45 "$HOST" 'sudo systemctl stop ollama' >/dev/null 2>&1 || true
+  # Stopping the GPU host's model server needs sudo over SSH — opt in with AVATAR_MANAGE_OLLAMA=1
+  # (avatar.sh already unloads idle models without root; this only matters if ollama reloads mid-run).
+  MANAGE_OLLAMA="${AVATAR_MANAGE_OLLAMA:-0}"
+  [ "$MANAGE_OLLAMA" = 1 ] && { ssh -o ConnectTimeout=45 "$HOST" 'sudo -n systemctl stop ollama' >/dev/null 2>&1 || true; }
   AVATAR_HOST="$HOST" "$SC/avatar.sh" "$PLATE" "$PROJ/vo1.wav" "$PROJ/avatar-face.mp4"
   AVATAR_HOST="$HOST" "$SC/avatar.sh" "$PLATE" "$PROJ/vo5.wav" "$PROJ/avatar-cta.mp4"
-  ssh -o ConnectTimeout=45 "$HOST" 'sudo systemctl start ollama' >/dev/null 2>&1 || true
+  [ "$MANAGE_OLLAMA" = 1 ] && { ssh -o ConnectTimeout=45 "$HOST" 'sudo -n systemctl start ollama' >/dev/null 2>&1 || true; }
 else
   echo "[variant] no avatar for this project (skipped)"
 fi

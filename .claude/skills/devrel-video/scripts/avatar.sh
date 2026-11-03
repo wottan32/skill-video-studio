@@ -48,7 +48,9 @@ echo "[avatar] lip-sync + face-crop on $HOST (this is the slow GPU step, ~10 min
 REMOTE_SH="$(mktemp)"
 cat > "$REMOTE_SH" <<'REMOTE_EOF'
 set -euo pipefail
-cd "$(eval echo "$LS_DIR")"
+# Expand a leading ~ or a literal $HOME in LS_DIR without eval (the value comes from a sourced config file).
+LS_DIR="${LS_DIR/#\~/$HOME}"; LS_DIR="${LS_DIR//\$HOME/$HOME}"
+cd "$LS_DIR"
 export HIP_VISIBLE_DEVICES=1 HF_HUB_DISABLE_TELEMETRY=1
 export PYTORCH_ALLOC_CONF=expandable_segments:True PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 

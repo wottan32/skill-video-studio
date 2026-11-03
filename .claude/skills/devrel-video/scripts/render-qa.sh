@@ -4,15 +4,17 @@
 set -euo pipefail
 
 PROJ="$(cd "${1:?project dir}" && pwd)"; Q="${2:-high}"
+. "$(cd "$(dirname "$0")" && pwd)/_versions.sh"
+HF="hyperframes@$HYPERFRAMES_VERSION"   # pinned — see scripts/_versions.sh
 export HYPERFRAMES_NO_TELEMETRY=1 DO_NOT_TRACK=1 HYPERFRAMES_SKIP_SKILLS=1
 cd "$PROJ"; mkdir -p renders
 
-echo "== lint + check =="
-npx --yes hyperframes@latest lint
-npx hyperframes check
+echo "== lint + check ($HF) =="
+npx --yes "$HF" lint
+npx --yes "$HF" check
 
 echo "== render ($Q) =="
-npx hyperframes render --quality "$Q" -o renders/out.mp4
+npx --yes "$HF" render --quality "$Q" -o renders/out.mp4
 
 echo "== web-delivery copy =="
 ffmpeg -v error -y -i renders/out.mp4 -c:v libx264 -crf 21 -preset veryfast \

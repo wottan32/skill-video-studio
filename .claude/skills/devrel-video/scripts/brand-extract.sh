@@ -6,10 +6,11 @@ set -euo pipefail
 URL="${1:?url}"; NAME="${2:?brand name}"
 ROOT="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 OUT="$ROOT/brands/$NAME"; mkdir -p "$OUT"
+. "$(cd "$(dirname "$0")" && pwd)/_versions.sh"
 
 export HYPERFRAMES_NO_TELEMETRY=1 DO_NOT_TRACK=1 HYPERFRAMES_SKIP_SKILLS=1
 TMP="$(mktemp -d)"
-npx --yes hyperframes@latest capture "$URL" -o "$TMP/cap" --max-screenshots 3 --skip-vision --json >/dev/null 2>&1 || true
+npx --yes "hyperframes@$HYPERFRAMES_VERSION" capture "$URL" -o "$TMP/cap" --max-screenshots 3 --skip-vision --json >/dev/null 2>&1 || true
 
 if [ -f "$TMP/cap/extracted/tokens.json" ]; then
   cp "$TMP/cap/extracted/tokens.json" "$OUT/tokens.json"; echo "wrote $OUT/tokens.json"

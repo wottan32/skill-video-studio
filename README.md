@@ -4,7 +4,7 @@
 
 <h1 align="center">Video Studio Skill</h1>
 <p align="center">From product workflow to polished demo.</p>
-<p align="center"><a href="https://github.com/aaitor/skill-video-studio/releases/tag/v1.0.1">v1.0.1 release</a> · <code>aaitor/skill-video-studio</code></p>
+<p align="center"><a href="https://github.com/wottan32/skill-video-studio/releases/tag/v1.0.2">v1.0.2 hardened fork</a> · <code>wottan32/skill-video-studio</code> · upstream <a href="https://github.com/aaitor/skill-video-studio/releases/tag/v1.0.1">aaitor v1.0.1</a> · <a href="docs/security-audit.md">security audit</a></p>
 <p align="center">
   <a href="#quick-start">Quick start</a> ·
   <a href="#worked-videos">Worked videos</a> ·

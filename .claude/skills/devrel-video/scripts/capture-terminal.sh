@@ -14,17 +14,25 @@ TAPE="${1:?path to .tape}"; OUT_ARG="${2:-}"
 SKILL="$(cd "$(dirname "$0")/.." && pwd)"
 TOOLS="$SKILL/.vhs"; mkdir -p "$TOOLS"
 export PATH="$HOME/go/bin:$TOOLS:$PATH"
+. "$SKILL/scripts/_versions.sh"
 
 # vhs (Charm) renders a .tape headlessly to video; ttyd + ffmpeg are its runtime deps.
 # Headless chromium inside vhs launched clean on an AppArmor/Wayland host — no sandbox flag needed.
 if ! command -v vhs >/dev/null; then
   command -v go >/dev/null || { echo "ERROR: need 'go' to install vhs (https://github.com/charmbracelet/vhs)"; exit 1; }
-  echo "installing vhs (one-time)…"; GOBIN="$HOME/go/bin" go install github.com/charmbracelet/vhs@latest
+  echo "installing vhs@$VHS_VERSION (one-time)…"; GOBIN="$HOME/go/bin" go install "github.com/charmbracelet/vhs@$VHS_VERSION"
 fi
 if ! command -v ttyd >/dev/null; then
-  echo "fetching ttyd static binary (one-time)…"
-  V="$(curl -fsSL https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+' || echo 1.7.7)"
-  curl -fsSL -o "$TOOLS/ttyd" "https://github.com/tsl0922/ttyd/releases/download/${V}/ttyd.x86_64" && chmod +x "$TOOLS/ttyd"
+  # Pinned release + checksum from its SHA256SUMS (scripts/_versions.sh): never run an unverified download.
+  [ "$(uname -m)" = x86_64 ] || { echo "ERROR: only the x86_64 ttyd binary is pinned — install ttyd yourself for $(uname -m)"; exit 1; }
+  echo "fetching ttyd $TTYD_VERSION static binary (one-time)…"
+  DL="$(mktemp)"
+  curl -fsSL -o "$DL" "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64"
+  GOT="$(sha256sum "$DL" | cut -d' ' -f1)"
+  if [ "$GOT" != "$TTYD_SHA256_X86_64" ]; then
+    rm -f "$DL"; echo "ERROR: ttyd checksum mismatch (got $GOT) — refusing to install"; exit 1
+  fi
+  mv -f "$DL" "$TOOLS/ttyd" && chmod +x "$TOOLS/ttyd"
 fi
 
 TAPEDIR="$(cd "$(dirname "$TAPE")" && pwd)"; TAPEFILE="$(basename "$TAPE")"

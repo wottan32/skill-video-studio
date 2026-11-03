@@ -14,6 +14,9 @@
 #   • A LIVE model turn is NON-DETERMINISTIC (wording + surprise popups vary run to run). For a polished,
 #     repeatable cut, script a fixed answer (the HTML-terminal re-enactment seam in composition.html)
 #     or record a good take and trim. Live capture = most authentic; re-enactment = most controllable.
+#   • TRUST THE DEMO DIR YOURSELF, BEFORE recording: open `claude` once in {{DEMO_DIR}} by hand and accept
+#     the folder-trust prompt. The tape no longer presses Enter blindly — a blind Enter would approve
+#     whatever prompt happened to be on screen (a wrong path, a permission request).
 
 Output beat.mp4          # capture-terminal.sh re-encodes this in place (dense keyframes)
 Set FontSize 20
@@ -28,9 +31,7 @@ Enter
 Sleep 400ms
 Type "claude"
 Enter
-Sleep 4s
-Enter                    # accept the folder-trust prompt if shown (otherwise a harmless empty submit)
-Sleep 2s
+Sleep 6s                 # the folder must already be trusted (see SANITATION) — no blind Enter here
 Show
 
 Sleep 700ms

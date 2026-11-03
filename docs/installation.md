@@ -41,14 +41,16 @@ Follow the [worked example](../projects/example-walkthrough/README.md) to serve 
 
 Full video generation is a local production workflow and can take time and disk space. The README demo plans a brief only; it does not prove your capture/render stack is installed.
 
-## Install v1.0.1
+## Install v1.0.2 (hardened fork)
 
 For a stable install, clone the release tag instead of the moving default branch:
 
 ```bash
-git clone --branch v1.0.1 --depth 1 https://github.com/aaitor/skill-video-studio.git
+git clone --branch v1.0.2 --depth 1 https://github.com/wottan32/skill-video-studio.git
 cd skill-video-studio
 claude
 ```
 
-The release keeps the native workspace layout and `/devrel-video` invocation. See the [release notes](https://github.com/aaitor/skill-video-studio/releases/tag/v1.0.1) for included features and validation limits.
+v1.0.2 is the upstream v1.0.1 plus the security hardening described in [security-audit.md](security-audit.md) and the [changelog](../CHANGELOG.md): pinned tool versions, checksum-verified `ttyd`, sandbox on by default, loopback-only thumbnail server. Upstream v1.0.1 remains at [aaitor/skill-video-studio](https://github.com/aaitor/skill-video-studio/releases/tag/v1.0.1).
+
+Keep the skill as a project skill (this folder), not under `~/.claude/skills`, so it is only available while you work on videos. The scripts target Linux; on Windows use WSL2.
